@@ -6,8 +6,6 @@ HARNEX is an innovative **AR/VR and IoT-based vehicle maintenance system** desig
 
 The system helps technicians identify faults in complicated **wire harnesses and vehicle components** by combining real-time IoT data with Augmented Reality (AR) guidance. Instead of depending entirely on physical manuals and expert knowledge, technicians can receive interactive, visual, step-by-step instructions directly within their field of view.
 
----
-
 ## 🎯 Problem Statement
 
 Modern large vehicles contain highly complex electrical systems, sensors, and wire harnesses. Identifying a fault manually can be difficult and time-consuming.
