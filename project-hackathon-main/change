@@ -1,0 +1,85 @@
+using UnityEngine;
+using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
+using System.Collections;
+using SimpleJSON;
+
+public class GitHubGistFetcher : MonoBehaviour
+{
+    public Renderer targetRenderer;
+
+    // Insert your actual GitHub token here
+    [SerializeField] private string token = ""; 
+
+    private readonly string gistApiUrl = "https://api.github.com/gists/925714300b18a8542841ce7eafe2b24a";
+    private bool alreadyRedirected = false;
+
+    void Start()
+    {
+        StartCoroutine(RepeatFetch());
+    }
+
+    IEnumerator RepeatFetch()
+    {
+        while (true)
+        {
+            yield return StartCoroutine(GetColorStatusFromGist());
+            yield return new WaitForSeconds(5f); // Delay between each fetch
+        }
+    }
+
+    IEnumerator GetColorStatusFromGist()
+    {
+        UnityWebRequest request = UnityWebRequest.Get(gistApiUrl);
+        request.SetRequestHeader("Authorization", $"token {token}");
+        request.SetRequestHeader("User-Agent", "UnityApp");
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            JSONNode rootNode = JSON.Parse(request.downloadHandler.text);
+            string content = rootNode["files"]["colour_status.txt"]["content"];
+
+            Debug.Log("Color Status: " + content);
+
+            if (content.Trim() == "1")
+            {
+                SetModelColor(Color.red);
+
+                if (!alreadyRedirected)
+                {
+                    alreadyRedirected = true;
+                    StartCoroutine(LoadSceneAfterDelay("wires_wiper", 5f)); 
+                }
+            }
+            else
+            {
+                SetModelColor(Color.green);
+                alreadyRedirected = false;
+            }
+        }
+        else
+        {
+            Debug.LogError("Error fetching Gist: " + request.responseCode + " - " + request.error);
+        }
+    }
+
+    void SetModelColor(Color color)
+    {
+        if (targetRenderer != null)
+        {
+            targetRenderer.material.color = color;
+        }
+        else
+        {
+            Debug.LogWarning("Target Renderer not assigned.");
+        }
+    }
+
+    IEnumerator LoadSceneAfterDelay(string sceneName, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        SceneManager.LoadScene(sceneName);
+    }
+}
